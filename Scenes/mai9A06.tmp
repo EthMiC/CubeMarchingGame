@@ -1,7 +1,6 @@
-[gd_scene load_steps=9 format=3 uid="uid://c3un6mwkugkjc"]
+[gd_scene load_steps=7 format=3 uid="uid://c3un6mwkugkjc"]
 
 [ext_resource type="Texture2D" uid="uid://byve28gj406mm" path="res://AllSkyFree_Sky_EpicBlueSunset_Equirect.png" id="1_nsau5"]
-[ext_resource type="Shader" uid="uid://dksvj5agy5co2" path="res://Scenes/main.tres" id="2_ipnv3"]
 [ext_resource type="Script" path="res://Script/ProceduralMesh.gd" id="2_yoxwh"]
 [ext_resource type="Script" path="res://Script/CameraOrbit.gd" id="3_g1c82"]
 
@@ -15,10 +14,6 @@ sky_material = SubResource("PanoramaSkyMaterial_c8w41")
 background_mode = 2
 sky = SubResource("Sky_36kw6")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_w3qd8"]
-render_priority = 0
-shader = ExtResource("2_ipnv3")
-
 [node name="Main" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -26,16 +21,13 @@ environment = SubResource("Environment_x0kr0")
 
 [node name="PhysicalObjects" type="Node" parent="."]
 
-[node name="ProceduralMesh" type="CSGMesh3D" parent="PhysicalObjects"]
-material = SubResource("ShaderMaterial_w3qd8")
+[node name="ProceduralMesh" type="Node3D" parent="PhysicalObjects"]
 script = ExtResource("2_yoxwh")
 GridSize = 30
 VoxelSize = 0.5
 
 [node name="CameraOrbit" type="Node3D" parent="."]
 script = ExtResource("3_g1c82")
-sensitivity = 1.0
-zoom = 0.1
 
 [node name="Camera3D" type="Camera3D" parent="CameraOrbit"]
-transform = Transform3D(1, 0, 0, 0, 0.950353, 0.311174, 0, -0.311174, 0.950353, 0, 5, 20)
+transform = Transform3D(1, 0, 0, 0, 0.950353, 0.311174, 0, -0.311174, 0.950353, 0, 5.36451, 21.0274)

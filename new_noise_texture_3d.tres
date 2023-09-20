@@ -1,9 +1,0 @@
-[gd_resource type="NoiseTexture3D" load_steps=3 format=3 uid="uid://bijr30jbt27im"]
-
-[sub_resource type="Gradient" id="Gradient_fwxpf"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_dk262"]
-
-[resource]
-color_ramp = SubResource("Gradient_fwxpf")
-noise = SubResource("FastNoiseLite_dk262")

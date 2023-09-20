@@ -1,7 +1,9 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1695144914
+::res://::1695195651
 AllSkyFree_Sky_EpicBlueSunset_Equirect.png::CompressedTexture2D::4114597691235704280::1693984836::1695142857::1::::<><>::
 icon.svg::CompressedTexture2D::3811254569515171448::1695142332::1695142803::1::::<><>::
-ProceduralMesh.gd::GDScript::-1::1695144486::0::1::::<>Node3D<>::
-::res://Scenes/::1695144510
-main.tscn::PackedScene::6780261889596547724::1695144510::0::1::::<><>::uid://byve28gj406mm::::res://AllSkyFree_Sky_EpicBlueSunset_Equirect.png<>res://ProceduralMesh.gd
+::res://Scenes/::1695156120
+main.tscn::PackedScene::6780261889596547724::1695156120::0::1::::<><>::uid://byve28gj406mm::::res://AllSkyFree_Sky_EpicBlueSunset_Equirect.png<>res://Script/ProceduralMesh.gd<>res://Script/CameraOrbit.gd
+::res://Script/::1695156120
+CameraOrbit.gd::GDScript::-1::1695154414::0::1::::<>Node3D<>::
+ProceduralMesh.gd::GDScript::-1::1695156120::0::1::::<>Node3D<>::
