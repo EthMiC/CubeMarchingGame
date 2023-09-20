@@ -1,2 +1,5 @@
+FastNoiseLite
+Gradient
+GradientTexture1D
 NoiseTexture2D
 NoiseTexture3D

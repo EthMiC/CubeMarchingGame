@@ -1,22 +1,34 @@
 extends CSGMesh3D
 
+@export var genMesh: bool: set = GenInViewport
+
 @export var GridSize:int;
 @export var VoxelSize:float;
 
-var noise = NoiseTexture3D.new();
+var noise = FastNoiseLite.new();
+var floor = FastNoiseLite.new();
 var treshHold = 0.25;
 
 var surface_array = [];
-var vertexDictionary = {};
-var faceDictionary = {};
 var verticies:PackedVector3Array;
 var tris:PackedInt32Array;
 
+var thread;
+var collider;
+
 func _ready():
-	noise.noise = FastNoiseLite.new();
+	thread = Thread.new();
+	thread.start(Callable(self, "_thread_function"), 0);
+	
+
+func GenInViewport(__):
+	print("oop")
+
+func _thread_function():
 	for x in GridSize + 1:
 		for y in GridSize + 1:
 			for z in GridSize + 1:
+				call_deferred("set_scale", Vector3(((x + y + z) / (GridSize * 3)), 1, 1))
 				var normals = [Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1)]
 				if y == 0 || z == 0:
 					normals.erase(Vector3(1, 0, 0));
@@ -24,14 +36,12 @@ func _ready():
 					normals.erase(Vector3(0, 1, 0));
 				if x == 0 || y == 0:
 					normals.erase(Vector3(0, 0, 1));
-				print(normals)
 				
-				var voxelPos = Vector3(x - float(GridSize - 1) / 2, y - float(GridSize - 1) / 2, z - float(GridSize - 1) / 2) * VoxelSize - Vector3.ONE;
+				var voxelPos = Vector3(x - float(GridSize - 1) / 2, y, z - float(GridSize - 1) / 2) * VoxelSize - Vector3.ONE;
 				
 				for face in normals:
-					var surface = getNoisePass(x, y, z, treshHold) - getNoisePass(x + face.x, y + face.y, z + face.z, treshHold);
+					var surface = getState(x, y, z, treshHold) - getState(x + face.x, y + face.y, z + face.z, treshHold);
 					if surface != 0:
-						var parentVoxelPos = voxelPos + ((face / 2) - (abs(face) / 2))
 						var localIndecies = [];
 						for j in 2:
 							for k in 2:
@@ -43,22 +53,15 @@ func _ready():
 								elif face.z != 0:
 									vertLocalPos = Vector3(2 * k - 1, 2 * j - 1, face.z);
 								var vertGlobalPos = voxelPos + vertLocalPos * VoxelSize / 2;
-								if !vertexDictionary.has(vertGlobalPos):
+								if !verticies.has(vertGlobalPos):
 									verticies.append(vertGlobalPos);
-									vertexDictionary[vertGlobalPos] = len(verticies) - 1;
 									localIndecies.append(len(verticies) - 1);
 								else:
-									localIndecies.append(vertexDictionary[vertGlobalPos]);
+									localIndecies.append(verticies.find(vertGlobalPos));
 						if surface == 1:
 							tris.append_array([localIndecies[0], localIndecies[2], localIndecies[3], localIndecies[0], localIndecies[3], localIndecies[1]]);
 						elif surface == -1:
 							tris.append_array([localIndecies[0], localIndecies[3], localIndecies[2], localIndecies[0], localIndecies[1], localIndecies[3]]);
-	
-	for v in verticies:
-		var point = CSGSphere3D.new();
-		point.translate(v);
-		point.scale = Vector3.ONE * .25;
-		#add_child(point);
 	
 	if len(verticies):
 		mesh = ArrayMesh.new();
@@ -71,11 +74,16 @@ func _ready():
 		surface_array[Mesh.ARRAY_INDEX] = tris;
 	
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array);
-	
-	print(len(tris) / 6);
+
+func _exit_tree():
+	thread.wait_to_finish();
 
 func _process(delta):
-	pass
+	if mesh != null && collider == null:
+		collider = mesh.create_trimesh_shape();
+		
+		get_parent().get_child(1).shape = collider;
 
-func getNoisePass(_x, _y, _z, _pass):
-	return int(noise.noise.get_noise_3dv(Vector3(_x, _y, _z)) > _pass);
+func getState(_x, _y, _z, _pass):
+	var floorValue = floor.get_noise_2d(_x, _z);
+	return int(noise.get_noise_3dv(Vector3(_x, _y, _z)) + clamp((floorValue + 1.1) - _y * 0.1, 0, 1) > _pass);

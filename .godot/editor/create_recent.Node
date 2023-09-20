@@ -1,6 +1,12 @@
+CollisionShape3D
+RigidBody3D
 CSGMesh3D
-Node3D
+StaticBody3D
+CollisionPolygon3D
+CSGBox3D
+BoxContainer
 CSGSphere3D
-Camera3D
 Node
+Node3D
+Camera3D
 WorldEnvironment
