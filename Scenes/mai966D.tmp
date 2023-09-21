@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://c3un6mwkugkjc"]
+[gd_scene load_steps=9 format=3 uid="uid://c3un6mwkugkjc"]
 
 [ext_resource type="Script" path="res://Script/ProceduralMesh.gd" id="1_8wbx3"]
 [ext_resource type="Script" path="res://Script/CameraOrbit.gd" id="3_g1c82"]
@@ -16,10 +16,11 @@ sky_material = SubResource("ProceduralSkyMaterial_r5bvk")
 background_mode = 2
 sky = SubResource("Sky_36kw6")
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rpy5n"]
-albedo_color = Color(0.619608, 0.729412, 0.411765, 1)
-
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_q3fvh"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_5u0b0"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_gmafa"]
 
 [node name="Main" type="Node3D"]
 
@@ -34,8 +35,10 @@ transform = Transform3D(0.736664, 0.595638, -0.320222, -0.234386, 0.669052, 0.70
 [node name="ProceduralMesh" type="StaticBody3D" parent="PhysicalObjects"]
 
 [node name="CSGMesh3D" type="CSGMesh3D" parent="PhysicalObjects/ProceduralMesh"]
-material = SubResource("StandardMaterial3D_rpy5n")
 script = ExtResource("1_8wbx3")
+WorldSize = Vector3i(1, 2, 1)
+ChunkSize = 32
+VoxelSize = 1.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PhysicalObjects/ProceduralMesh"]
 shape = SubResource("ConvexPolygonShape3D_q3fvh")
@@ -49,3 +52,13 @@ zoom = 0.1
 transform = Transform3D(1, 0, 0, 0, 0.950353, 0.311174, 0, -0.311174, 0.950353, 0, 10, 20)
 
 [node name="Entities" type="Node" parent="."]
+
+[node name="RigidBody3D" type="RigidBody3D" parent="Entities"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1690, 0)
+linear_velocity = Vector3(1, 315, 0)
+
+[node name="CSGMesh3D" type="CSGMesh3D" parent="Entities/RigidBody3D"]
+mesh = SubResource("CapsuleMesh_5u0b0")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Entities/RigidBody3D"]
+shape = SubResource("CapsuleShape3D_gmafa")

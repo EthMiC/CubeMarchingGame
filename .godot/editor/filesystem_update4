@@ -1,6 +1,2 @@
 res://Scenes/main.tscn
 res://Script/ProceduralMesh.gd
-res://Script/CameraOrbit.gd
-res://Scenes/main.tres
-res://new_gradient.tres
-res://Script/CSGSphere3D.gd

@@ -1,6 +1,8 @@
+CSGMesh3D
+MeshInstance3D
+DirectionalLight3D
 CollisionShape3D
 RigidBody3D
-CSGMesh3D
 StaticBody3D
 CollisionPolygon3D
 CSGBox3D

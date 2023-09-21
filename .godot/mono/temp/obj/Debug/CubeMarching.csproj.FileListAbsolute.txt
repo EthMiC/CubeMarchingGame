@@ -1,0 +1,17 @@
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\CubeMarching.csproj.AssemblyReference.cache
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\CubeMarching.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\CubeMarching.AssemblyInfoInputs.cache
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\CubeMarching.AssemblyInfo.cs
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\CubeMarching.csproj.CoreCompileInputs.cache
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\bin\Debug\CubeMarching.deps.json
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\bin\Debug\CubeMarching.runtimeconfig.json
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\bin\Debug\CubeMarching.dll
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\bin\Debug\CubeMarching.pdb
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\bin\Debug\GodotSharp.dll
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\bin\Debug\GodotSharpEditor.dll
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\CubeMarching.csproj.CopyComplete
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\CubeMarching.dll
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\refint\CubeMarching.dll
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\CubeMarching.pdb
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\CubeMarching.genruntimeconfig.cache
+C:\Users\Aman\Desktop\Games\CubeMarching\CubeMarchingGame\.godot\mono\temp\obj\Debug\ref\CubeMarching.dll

@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "5VqXxkMmk/Nda17OWWr7K4Mge7i9x2+dhJPwKophxCJw+xualnl89ZUSrEeb+AYYCWg2+7juYjWLZfZ2blIfbQ==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Aman\\Desktop\\Games\\CubeMarching\\CubeMarchingGame\\CubeMarching.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Aman\\.nuget\\packages\\godot.sourcegenerators\\4.1.1\\godot.sourcegenerators.4.1.1.nupkg.sha512",
+    "C:\\Users\\Aman\\.nuget\\packages\\godotsharp\\4.1.1\\godotsharp.4.1.1.nupkg.sha512",
+    "C:\\Users\\Aman\\.nuget\\packages\\godotsharpeditor\\4.1.1\\godotsharpeditor.4.1.1.nupkg.sha512"
+  ],
+  "logs": []
+}
