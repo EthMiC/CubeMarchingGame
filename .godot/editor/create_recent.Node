@@ -1,3 +1,5 @@
+CSGBox3D
+BoxContainer
 CSGMesh3D
 MeshInstance3D
 DirectionalLight3D
@@ -5,8 +7,6 @@ CollisionShape3D
 RigidBody3D
 StaticBody3D
 CollisionPolygon3D
-CSGBox3D
-BoxContainer
 CSGSphere3D
 Node
 Node3D

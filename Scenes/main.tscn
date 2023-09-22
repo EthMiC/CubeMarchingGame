@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://c3un6mwkugkjc"]
+[gd_scene load_steps=13 format=3 uid="uid://c3un6mwkugkjc"]
 
 [ext_resource type="Script" path="res://Script/ProceduralMesh.gd" id="1_8wbx3"]
 [ext_resource type="Script" path="res://Script/CameraOrbit.gd" id="3_g1c82"]
@@ -19,6 +19,25 @@ sky = SubResource("Sky_36kw6")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rpy5n"]
 albedo_color = Color(0.619608, 0.729412, 0.411765, 1)
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_njr2d"]
+fractal_octaves = 2
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_h5nqr"]
+fractal_octaves = 2
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_wswt3"]
+frequency = 0.001
+fractal_octaves = 3
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5bip0"]
+frequency = 0.001
+offset = Vector3(0, 1000, 0)
+fractal_octaves = 2
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_do788"]
+frequency = 0.005
+fractal_octaves = 3
+
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_q3fvh"]
 
 [node name="Main" type="Node3D"]
@@ -36,6 +55,17 @@ transform = Transform3D(0.736664, 0.595638, -0.320222, -0.234386, 0.669052, 0.70
 [node name="CSGMesh3D" type="CSGMesh3D" parent="PhysicalObjects/ProceduralMesh"]
 material = SubResource("StandardMaterial3D_rpy5n")
 script = ExtResource("1_8wbx3")
+WorldSize = Vector3i(4, 2, 4)
+ChunkSize = 50
+VoxelSize = 1.0
+treshHold = 0.625
+mountainNoise = SubResource("FastNoiseLite_njr2d")
+hillNoise = SubResource("FastNoiseLite_h5nqr")
+mountainTerrainNoise = SubResource("FastNoiseLite_wswt3")
+hillTerrainNoise = SubResource("FastNoiseLite_5bip0")
+clipNoise = SubResource("FastNoiseLite_do788")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="PhysicalObjects/ProceduralMesh/CSGMesh3D"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PhysicalObjects/ProceduralMesh"]
 shape = SubResource("ConvexPolygonShape3D_q3fvh")
@@ -49,3 +79,6 @@ zoom = 0.1
 transform = Transform3D(1, 0, 0, 0, 0.950353, 0.311174, 0, -0.311174, 0.950353, 0, 10, 20)
 
 [node name="Entities" type="Node" parent="."]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+size = Vector3(30, 0.5, 0.5)
