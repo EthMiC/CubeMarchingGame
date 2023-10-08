@@ -17,12 +17,11 @@ sky_material = SubResource("ProceduralSkyMaterial_r5bvk")
 background_mode = 2
 sky = SubResource("Sky_36kw6")
 
-[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_mv2x6"]
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bljtc"]
 albedo_color = Color(0.576471, 0.803922, 0.454902, 1)
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_uwnis"]
+[sub_resource type="MultiMesh" id="MultiMesh_16ytq"]
+transform_format = 1
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_njr2d"]
 fractal_octaves = 2
@@ -43,6 +42,8 @@ fractal_octaves = 2
 frequency = 0.005
 fractal_octaves = 3
 
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_mv2x6"]
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_h60eu"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_wd1tb"]
@@ -59,12 +60,9 @@ transform = Transform3D(-4.37114e-08, -0.529919, 0.848048, 0, 0.848048, 0.529919
 
 [node name="ProceduralMesh" type="StaticBody3D" parent="PhysicalObjects"]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="PhysicalObjects/ProceduralMesh"]
-shape = SubResource("ConcavePolygonShape3D_mv2x6")
-
-[node name="Ground" type="MeshInstance3D" parent="PhysicalObjects/ProceduralMesh"]
+[node name="Ground" type="MultiMeshInstance3D" parent="PhysicalObjects/ProceduralMesh"]
 material_override = SubResource("StandardMaterial3D_bljtc")
-mesh = SubResource("ArrayMesh_uwnis")
+multimesh = SubResource("MultiMesh_16ytq")
 script = ExtResource("1_8wbx3")
 WorldSize = Vector3i(2, 4, 2)
 ChunkSize = 25
@@ -75,6 +73,9 @@ hillNoise = SubResource("FastNoiseLite_h5nqr")
 mountainTerrainNoise = SubResource("FastNoiseLite_wswt3")
 hillTerrainNoise = SubResource("FastNoiseLite_5bip0")
 clipNoise = SubResource("FastNoiseLite_do788")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PhysicalObjects/ProceduralMesh"]
+shape = SubResource("ConcavePolygonShape3D_mv2x6")
 
 [node name="CameraOrbit" type="Node3D" parent="."]
 script = ExtResource("3_g1c82")

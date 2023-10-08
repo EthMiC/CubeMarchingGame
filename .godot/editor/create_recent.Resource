@@ -1,4 +1,6 @@
-CSharpScript
+GDExtension
+Resource
+GDScript
 FastNoiseLite
 Gradient
 GradientTexture1D

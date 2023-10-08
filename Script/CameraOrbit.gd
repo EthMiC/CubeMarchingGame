@@ -6,6 +6,9 @@ extends Node3D
 var rotationY = 0;
 var drag = false;
 
+func _ready():
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
 func _input(event):
 	if event is InputEventMouseMotion && drag:
 		rotate(Vector3.UP, deg_to_rad(-event.relative.x * sensitivity));
