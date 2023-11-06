@@ -1,7 +1,8 @@
 extends CharacterBody3D
 
-@export var SPEED = 5.0
-@export var JUMP_VELOCITY = 4.5
+@export var SPEED = 4.317
+@export var SPRINT_SPEED = 5.612
+@export var JUMP_VELOCITY = 11.2
 @export var accel:float;
 @export var deccel:float;
 
@@ -21,9 +22,6 @@ func _physics_process(delta):
 		started = !started
 		get_child(1).current = !get_child(1).current
 	
-	if !started:
-		return
-	
 	var dir = transform.basis.z;
 
 	var frontInput = float(Input.is_key_pressed(KEY_W)) - float(Input.is_key_pressed(KEY_S));
@@ -42,9 +40,15 @@ func _physics_process(delta):
 		right += min(abs(rightDir), (1 / deccel) * delta) * ceil(abs(rightDir)) * sign(rightDir);
 
 	var vel_vector = ((dir * front) + (dir.cross(Vector3.UP) * right));
+	
+	velocity.x = -min(abs(vel_vector.x), abs(vel_vector.normalized().x)) * sign(vel_vector.x);
+	velocity.z = -min(abs(vel_vector.z), abs(vel_vector.normalized().z)) * sign(vel_vector.z);
 
-	velocity.x = -min(abs(vel_vector.x), abs(vel_vector.normalized().x)) * sign(vel_vector.x) * SPEED;
-	velocity.z = -min(abs(vel_vector.z), abs(vel_vector.normalized().z)) * sign(vel_vector.z) * SPEED;
+	if Input.is_action_pressed("ui_shift"):
+		velocity *= Vector3(SPRINT_SPEED, 1, SPRINT_SPEED);
+	else:
+		velocity *= Vector3(SPEED, 1, SPEED);
+	
 	
 	# Add the gravity.
 	if not is_on_floor():
@@ -53,17 +57,6 @@ func _physics_process(delta):
 	# Handle Jump.
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
-
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
-#	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-#	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-#	if direction:
-#		velocity.x = direction.x * SPEED
-#		velocity.z = direction.z * SPEED
-#	else:
-#		velocity.x = move_toward(velocity.x, 0, SPEED)
-#		velocity.z = move_toward(velocity.z, 0, SPEED)
 
 	move_and_slide()
 
