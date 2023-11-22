@@ -1,9 +1,9 @@
+Sprite3D
 CSGBox3D
 OmniLight3D
 MeshInstance3D
 ColorRect
 MeshInstance2D
-Sprite3D
 CSGMesh3D
 MultiMeshInstance3D
 Node

@@ -1,7 +1,8 @@
+ImageTexture
+Image
 NoiseTexture2D
 Shader
 VisualShader
-ImageTexture
 GradientTexture2D
 Gradient
 GDExtension

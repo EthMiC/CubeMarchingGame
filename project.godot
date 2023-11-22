@@ -30,3 +30,7 @@ ui_shift={
 [physics]
 
 3d/default_gravity=31.36
+
+[rendering]
+
+anti_aliasing/canvas_textures/default_texture_filter=1

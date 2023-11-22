@@ -18,9 +18,13 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 
 func _physics_process(delta):
+	
 	if Input.is_action_just_pressed("ui_text_completion_accept"):
 		started = !started
 		get_child(1).current = !get_child(1).current
+	
+	if !started:
+		return;      
 	
 	var dir = transform.basis.z;
 

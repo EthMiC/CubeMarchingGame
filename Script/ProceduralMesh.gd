@@ -19,7 +19,6 @@ var chunkInfo = [];
 var meshInfo = [];
 var builtChunks = [];
 var currChunks = [];
-var collider;
 var buildCollider:bool;
 
 var meshes = [self]
@@ -27,7 +26,6 @@ var surfaceCount:int;
 var colliderFacesDictionary:Dictionary = {};
 
 var player;
-var CollisionShape;
 var currentPlayerPos:Vector3;
 var previousPlayerPos;
 
@@ -35,21 +33,23 @@ var t:Vector3;
 var w:Vector3;
 var offset:Vector3;
 
+var buildFile = preload("res://Script/WorldTextureGenerator.gd");
+
 func _ready():
 	player = get_tree().root.get_node("Main").get_node("Entities").get_node("CharacterBody3D");
-	CollisionShape = get_parent().get_child(0);
 	
-	for i in 5:
+	for i in 20:
 		Threads.append(Thread.new());
 	
-	collider = ConcavePolygonShape3D.new();
-	CollisionShape.shape = collider;
-	
-	_build_world_texture();
+	_build_world_texture_gpu();
 	
 	t = Vector3(TotalWorldSize.x, 0, TotalWorldSize.z);
 	w = Vector3(WorldSize.x, 0, WorldSize.z);
 	offset = Vector3(float(floor(t.x / 2) == t.x / 2), 0, float(floor(t.z / 2) == t.z / 2));
+
+func _build_world_texture_gpu():
+	var hillNoiseImage = hillNoise.get_image_3d(TotalWorldSize.x * ChunkSize.x + 2, TotalWorldSize.z * ChunkSize.z + 2, TotalWorldSize.y * ChunkSize.y + 2);
+	finalNoiseTexture = buildFile.new()._build(hillNoiseImage, 0.01, 0.01);
 
 func _build_world_texture():
 	finalNoiseTexture = [];
@@ -59,7 +59,7 @@ func _build_world_texture():
 		finalNoiseTexture[y].fill(Color8(0, 0, 0, 0));
 		for x in TotalWorldSize.x * ChunkSize.x:
 			for z in TotalWorldSize.z * ChunkSize.z:
-				var normalsList = [Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1), Vector3(-1, 0, 0), Vector3(0, -1, 0), Vector3(0, 0, -1)]
+				var normalsList = [Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1)]
 				
 				var voxelPos = Vector3(x - float(ChunkSize.x - 1) / 2, y, z - float(ChunkSize.z - 1) / 2) * VoxelSize - Vector3.ONE;
 				
@@ -80,15 +80,17 @@ func _build_world_texture():
 #					var surface = int(hillNoiseValue1 + 0.5 > treshHold) - int(hillNoiseValue2 + 0.5 > treshHold);
 					var surface = int((hillNoiseValue1 + 0.5 + mountainNoiseValue1) > treshHold) - int((hillNoiseValue2 + 0.5 + mountainNoiseValue2) > treshHold);
 #					var surface = int(terrainValue1 + 0.5 > treshHold) - int(terrainValue2 + 0.5 > treshHold);
-					if surface > 0:
+					if surface < 0: 
+						var prevValue = finalNoiseTexture[y + face.y].get_pixel(x + face.x, z + face.z);
+						if face.x > 0:
+							finalNoiseTexture[y].set_pixel(x + face.x, z, prevValue + Color8(1, 1, 1, 0));
+						elif face.y > 0:
+							finalNoiseTexture[y + face.y].set_pixel(x, z, prevValue + Color8(2, 2, 2, 0));
+						elif face.z > 0:
+							finalNoiseTexture[y].set_pixel(x, z + face.z, prevValue + Color8(4, 4, 4, 0));
+					elif surface > 0:
 						var prevValue = finalNoiseTexture[y].get_pixel(x, z);
-						if face.x < 0:
-							finalNoiseTexture[y].set_pixel(x, z, prevValue + Color8(1, 1, 1, 0));
-						elif face.y < 0:
-							finalNoiseTexture[y].set_pixel(x, z, prevValue + Color8(2, 2, 2, 0));
-						elif face.z < 0:
-							finalNoiseTexture[y].set_pixel(x, z, prevValue + Color8(4, 4, 4, 0));
-						elif face.x > 0:
+						if face.x > 0:
 							finalNoiseTexture[y].set_pixel(x, z, prevValue + Color8(8, 8, 8, 0));
 						elif face.y > 0:
 							finalNoiseTexture[y].set_pixel(x, z, prevValue + Color8(16, 16, 16, 0));
@@ -189,7 +191,7 @@ func _cube_marching_thread(_pos, _noisePos, i):
 					
 					for l in len(localIndecies)/4:
 						tris.append_array([localIndecies[4 * l], localIndecies[4 * l + 2], localIndecies[4 * l + 3], localIndecies[4 * l], localIndecies[4 * l + 3], localIndecies[4 * l + 1]]);
-	if len(verts):
+	if len(verts) > 0:
 		verts.append((_pos - Vector3(TotalWorldSize.x - 1, 0, TotalWorldSize.z - 1) / 2) * Vector3(ChunkSize));
 		normals.append(Vector3.UP);
 	
@@ -218,8 +220,9 @@ func _remove_surface_thread(surfaces, bufferList, i):
 #			var length = int(colliderFacesDictionary[(round(surfaces[s].aabb.position / ChunkSize) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2)][1]);
 			surfaces.remove_at(s);
 			surfaceCount -= 1;
-			colliderFacesDictionary[_pos].queue_free();
-			colliderFacesDictionary.erase(_pos);
+			if colliderFacesDictionary.has(_pos):
+				colliderFacesDictionary[_pos].queue_free();
+				colliderFacesDictionary.erase(_pos);
 #			for j in length:
 #				colliderFaces.remove_at(initIndex);
 #			for k in colliderFacesDictionary.values():
@@ -232,27 +235,27 @@ func _remove_surface_thread(surfaces, bufferList, i):
 
 func _add_surface_from_arrays(a):
 	surfaceCount += 1;
-	if surfaceCount % 200 == 0:
+	if surfaceCount / 200 > len(meshes) - 1:
 		var newMesh;
 		newMesh = MeshInstance3D.new();
 		newMesh.mesh = ArrayMesh.new();
 		meshes.append(newMesh);
 		newMesh.material_override = material_override;
 		call_deferred("add_sibling", newMesh);
-	meshes[len(meshes) - 1].mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a);
+	meshes[min(len(meshes) - 1, int(surfaceCount / 200))].mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a);
 
 func _add_collider(verts, tris):
-	var newColliderShape = ConcavePolygonShape3D.new();
-	var newCollider = CollisionShape3D.new();
-	newCollider.shape = newColliderShape;
-	var faces:PackedVector3Array = [];
-	for j in tris:
-		faces.append(verts[j]);
-	colliderFacesDictionary[(round(verts[len(verts) - 1] / Vector3(ChunkSize)) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2)] = newCollider;
-	newColliderShape.set_faces(faces);
-#	colliderFaces.append_array(faces);
-	call_deferred("add_sibling", newCollider);
-	pass
+	if !(colliderFacesDictionary.has((round(verts[len(verts) - 1] / Vector3(ChunkSize)) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2))):
+		var newColliderShape = ConcavePolygonShape3D.new();
+		var newCollider = CollisionShape3D.new();
+		newCollider.shape = newColliderShape;
+		var faces:PackedVector3Array = [];
+		for j in tris:
+			faces.append(verts[j]);
+		colliderFacesDictionary[(round(verts[len(verts) - 1] / Vector3(ChunkSize)) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2)] = newCollider;
+		newColliderShape.set_faces(faces);
+	#	colliderFaces.append_array(faces);
+		call_deferred("add_sibling", newCollider);
 
 func _commit_collider(i):
 	call_deferred("_remove_thread", i);
@@ -290,7 +293,7 @@ func _physics_process(_delta):
 				var surfaces = [];
 				for m in meshes:
 					surfaces.append_array(m.mesh._get_surfaces())
-				Threads[i].start(_remove_surface_thread.bind(surfaces, builtChunks.duplicate(false), Threads[i]));
+				Threads[i].start(_remove_surface_thread.bind(surfaces.duplicate(false), builtChunks.duplicate(false), Threads[i]));
 				break;
 	
 	if len(meshInfo):
