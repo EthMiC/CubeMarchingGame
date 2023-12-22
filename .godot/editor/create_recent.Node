@@ -1,3 +1,6 @@
+CSGSphere3D
+CollisionShape3D
+PhysicalBone3D
 Sprite3D
 CSGBox3D
 OmniLight3D
@@ -8,19 +11,5 @@ CSGMesh3D
 MultiMeshInstance3D
 Node
 Timer
-CollisionShape3D
-PhysicalBone3D
 Node3D
 BoneAttachment3D
-Skeleton3D
-HBoxContainer
-Camera3D
-CharacterBody3D
-FogVolume
-BoxContainer
-DirectionalLight3D
-RigidBody3D
-StaticBody3D
-CollisionPolygon3D
-CSGSphere3D
-WorldEnvironment

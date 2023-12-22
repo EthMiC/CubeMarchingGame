@@ -4,18 +4,14 @@
 [ext_resource type="Script" path="res://Script/CameraOrbit.gd" id="3_g1c82"]
 [ext_resource type="Script" path="res://Script/PlayerController.gd" id="3_wnpuk"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_r5bvk"]
-sky_top_color = Color(0.231373, 0.478431, 0.623529, 1)
-sky_horizon_color = Color(0.67451, 0.682353, 0.698039, 1)
-sky_curve = 0.135187
-ground_bottom_color = Color(0.231634, 0.234771, 0.136075, 1)
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xnfs3"]
 
-[sub_resource type="Sky" id="Sky_36kw6"]
-sky_material = SubResource("ProceduralSkyMaterial_r5bvk")
+[sub_resource type="Sky" id="Sky_0nvam"]
+sky_material = SubResource("ProceduralSkyMaterial_xnfs3")
 
 [sub_resource type="Environment" id="Environment_x0kr0"]
 background_mode = 2
-sky = SubResource("Sky_36kw6")
+sky = SubResource("Sky_0nvam")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bljtc"]
 albedo_color = Color(0.431373, 0.729412, 0.447059, 1)
@@ -23,9 +19,13 @@ albedo_color = Color(0.431373, 0.729412, 0.447059, 1)
 [sub_resource type="ArrayMesh" id="ArrayMesh_uwnis"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_njr2d"]
+seed = 2
+frequency = 0.0075
 fractal_octaves = 2
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_h5nqr"]
+seed = -5
+frequency = 0.005
 fractal_octaves = 2
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_wswt3"]
@@ -38,7 +38,9 @@ offset = Vector3(0, 1000, 0)
 fractal_octaves = 2
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_do788"]
-frequency = 0.005
+seed = 3
+frequency = 0.001
+offset = Vector3(0, 0, 1037)
 fractal_octaves = 3
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_h60eu"]
@@ -64,11 +66,10 @@ transform = Transform3D(-0.955937, 0.125827, -0.265241, -1.575e-08, 0.903492, 0.
 material_override = SubResource("StandardMaterial3D_bljtc")
 mesh = SubResource("ArrayMesh_uwnis")
 script = ExtResource("1_8wbx3")
-TotalWorldSize = Vector3i(12, 1, 12)
+TotalWorldSize = Vector3i(10, 1, 10)
 WorldSize = Vector3i(10, 1, 10)
-ChunkSize = Vector3i(32, 60, 32)
-VoxelSize = 1.0
-treshHold = 0.75
+ChunkSize = Vector3i(32, 100, 32)
+treshHold = 0.5
 mountainNoise = SubResource("FastNoiseLite_njr2d")
 hillNoise = SubResource("FastNoiseLite_h5nqr")
 mountainTerrainNoise = SubResource("FastNoiseLite_wswt3")
@@ -90,7 +91,7 @@ current = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 200, 0)
 script = ExtResource("3_wnpuk")
 SPEED = 5.612
-SPRINT_SPEED = 10.0
+SPRINT_SPEED = 6.892
 accel = 0.1
 deccel = 0.1
 sensitivity = 0.05

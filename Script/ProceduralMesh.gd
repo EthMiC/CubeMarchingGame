@@ -3,7 +3,6 @@ extends MeshInstance3D
 @export var TotalWorldSize:Vector3i;
 @export var WorldSize:Vector3i;
 @export var ChunkSize:Vector3i;
-@export var VoxelSize:float;
 @export var treshHold = 0.25;
 
 @export var mountainNoise:FastNoiseLite;
@@ -23,6 +22,7 @@ var buildCollider:bool;
 
 var meshes = [self]
 var surfaceCount:int;
+var surfacePerMesh:int = 200;
 var colliderFacesDictionary:Dictionary = {};
 
 var player;
@@ -38,7 +38,7 @@ var buildFile = preload("res://Script/WorldTextureGenerator.gd");
 func _ready():
 	player = get_tree().root.get_node("Main").get_node("Entities").get_node("CharacterBody3D");
 	
-	for i in 20:
+	for i in 5:
 		Threads.append(Thread.new());
 	
 	_build_world_texture_gpu();
@@ -48,8 +48,10 @@ func _ready():
 	offset = Vector3(float(floor(t.x / 2) == t.x / 2), 0, float(floor(t.z / 2) == t.z / 2));
 
 func _build_world_texture_gpu():
-	var hillNoiseImage = hillNoise.get_image_3d(TotalWorldSize.x * ChunkSize.x + 2, TotalWorldSize.z * ChunkSize.z + 2, TotalWorldSize.y * ChunkSize.y + 2);
-	finalNoiseTexture = buildFile.new()._build(hillNoiseImage, 0.01, 0.01);
+	var hillNoiseImage = hillNoise.get_image(TotalWorldSize.x * ChunkSize.x + 2, TotalWorldSize.z * ChunkSize.z + 2, TotalWorldSize.y * ChunkSize.y + 2);
+	var mountainNoiseImage = mountainNoise.get_image_3d(TotalWorldSize.x * ChunkSize.x + 2, TotalWorldSize.z * ChunkSize.z + 2, TotalWorldSize.y * ChunkSize.y + 2);
+	var clipNoiseImage = clipNoise.get_image(TotalWorldSize.x * ChunkSize.x + 2, TotalWorldSize.z * ChunkSize.z + 2);
+	finalNoiseTexture = buildFile.new()._build(hillNoiseImage, mountainNoiseImage, clipNoiseImage, 0.005, 0.0125, 0, 0.5, ChunkSize.y * TotalWorldSize.y);
 
 func _build_world_texture():
 	finalNoiseTexture = [];
@@ -61,7 +63,7 @@ func _build_world_texture():
 			for z in TotalWorldSize.z * ChunkSize.z:
 				var normalsList = [Vector3(1, 0, 0), Vector3(0, 1, 0), Vector3(0, 0, 1)]
 				
-				var voxelPos = Vector3(x - float(ChunkSize.x - 1) / 2, y, z - float(ChunkSize.z - 1) / 2) * VoxelSize - Vector3.ONE;
+				var voxelPos = Vector3(x - float(ChunkSize.x - 1) / 2, y, z - float(ChunkSize.z - 1) / 2) - Vector3.ONE;
 				
 				for face in normalsList:
 					var currCoords = Vector3(x, y, z);
@@ -96,45 +98,6 @@ func _build_world_texture():
 							finalNoiseTexture[y].set_pixel(x, z, prevValue + Color8(16, 16, 16, 0));
 						elif face.z > 0:
 							finalNoiseTexture[y].set_pixel(x, z, prevValue + Color8(32, 32, 32, 0));
-
-func _build_noise():
-#	var mountainNoiseValue = (mountainNoise.get_noise_3d(_pos.x * ChunkSize + x - float(WorldSize.x * ChunkSize) / 2, _pos.y * ChunkSize + y, _pos.z * ChunkSize + z - float(WorldSize.z * ChunkSize) / 2) + 1) / 2 + ((clipNoise.get_noise_2d(_pos.x * ChunkSize + x - float(WorldSize.x * ChunkSize) / 2, _pos.z * ChunkSize + z - (WorldSize.z * ChunkSize) / 2) + 1) / 2 - clamp((_pos.y * ChunkSize + y) * 0.01, 0, 1));
-#	var hillNoiseValue = (hillNoise.get_noise_2d(_pos.x * ChunkSize + x - float(WorldSize.x * ChunkSize) / 2, _pos.z * ChunkSize + z - float(WorldSize.z * ChunkSize) / 2) + 1) / 2 - clamp((_pos.y * ChunkSize + y) * 0.01, 0, 1);
-#	var mountainTerrainValue = (mountainTerrainNoise.get_noise_2d(_pos.x * ChunkSize + x - float(ChunkSize) / 2, _pos.z * ChunkSize + z - float(ChunkSize) / 2) + 1) / 2 - clamp((_pos.y * ChunkSize + y) * 0.01, 0, 1);
-#	var hillTerrainValue = (hillTerrainNoise.get_noise_2d(_pos.x * ChunkSize + x - float(ChunkSize) / 2, _pos.z * ChunkSize + z - float(ChunkSize) / 2) + 1) / 2 - clamp((_pos.y * ChunkSize + y) * 0.01, 0, 1);
-#	var terrainValue = mountainNoiseValue1 * mountainTerrainValue1 + hillNoiseValue1 * hillTerrainValue1;
-#	var surface = int(mountainNoiseValue1 > treshHold) - int(mountainNoiseValue2 > treshHold);
-#	var surface = int(hillNoiseValue1 + 0.5 > treshHold) - int(hillNoiseValue2 + 0.5 > treshHold);
-#	var surface = int((hillNoiseValue1 + 0.5 + mountainNoiseValue1) > treshHold) - int((hillNoiseValue2 + 0.5 + mountainNoiseValue2) > treshHold);
-#	var surface = int(terrainValue1 + 0.5 > treshHold) - int(terrainValue2 + 0.5 > treshHold);
-	
-	var hillNoiseImage = hillNoise.get_image(TotalWorldSize.x * ChunkSize.x + 2, TotalWorldSize.z * ChunkSize.z + 2);
-	print(hillNoiseImage)
-	var hillNoiseValue = [];
-	hillNoiseValue.resize(TotalWorldSize.y * ChunkSize.y + 2);
-
-	for i in len(hillNoiseValue):
-		var multiplier = 0.03;
-		var heightOffset = 2.25;
-		hillNoiseValue[i] = hillNoiseImage.duplicate(false);
-		for x in hillNoiseValue[i].get_width():
-			for z in hillNoiseValue[i].get_height():
-				hillNoiseValue[i].set_pixel(x, z, hillNoiseValue[i].get_pixel(x, z) + Color.WHITE * (heightOffset - clamp(float(i) * multiplier, 0, 5)));
-	
-#	var mountainNoiseImage = mountainNoise.get_image_3d(TotalWorldSize.x * ChunkSize + 1, TotalWorldSize.z * ChunkSize + 1, TotalWorldSize.y * ChunkSize + 2);
-#	var clipNoiseImage = clipNoise.get_image(TotalWorldSize.x * ChunkSize + 1, TotalWorldSize.z * ChunkSize + 1);
-#	var mountainNoiseValue = [];
-#	mountainNoiseValue.resize(TotalWorldSize.y * ChunkSize + 2);
-#
-#	for i in len(mountainNoiseValue):
-#		var multiplier = 100;
-#		var offset = 0;
-#		mountainNoiseValue[i] = mountainNoiseImage[i].duplicate(false);
-#		for x in mountainNoiseValue[i].get_width():
-#			for z in mountainNoiseValue[i].get_height():
-#				mountainNoiseValue[i].set_pixel(x, z, mountainNoiseValue[i].get_pixel(x, z) + (clipNoiseImage.get_pixel(x, z) - Color.WHITE * clamp(multiplier * float(i) / float(len(mountainNoiseValue)) * 0.01, 0, 5) + Color.WHITE * offset));
-	
-	finalNoiseTexture = hillNoiseValue;
 
 func _cube_marching_thread(_pos, _noisePos, i):
 	var verts:PackedVector3Array = [];
@@ -214,12 +177,11 @@ func _build_mesh_thread(verts, tris, normals, i):
 func _remove_surface_thread(surfaces, bufferList, i):
 	var s = 0;
 	while s < len(surfaces):
-		var _pos = (round(surfaces[s].aabb.position / Vector3(ChunkSize)) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2)
+		var _pos = (round(surfaces[s].aabb.position / Vector3(ChunkSize)) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2);
 		if _pos not in bufferList:
+			surfaces.remove_at(s);
 #			var initIndex = int(colliderFacesDictionary[(round(surfaces[s].aabb.position / ChunkSize) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2)][0]);
 #			var length = int(colliderFacesDictionary[(round(surfaces[s].aabb.position / ChunkSize) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2)][1]);
-			surfaces.remove_at(s);
-			surfaceCount -= 1;
 			if colliderFacesDictionary.has(_pos):
 				colliderFacesDictionary[_pos].queue_free();
 				colliderFacesDictionary.erase(_pos);
@@ -230,19 +192,20 @@ func _remove_surface_thread(surfaces, bufferList, i):
 #					k[0] -= length;
 		else:
 			s += 1;
-	mesh._set_surfaces(surfaces);
+	for m in len(meshes):
+		meshes[m].mesh._set_surfaces(surfaces.slice(m, surfacePerMesh * (m + 1)));
 	call_deferred("_remove_thread", i);
 
 func _add_surface_from_arrays(a):
 	surfaceCount += 1;
-	if surfaceCount / 200 > len(meshes) - 1:
+	if surfaceCount / surfacePerMesh > len(meshes) - 1:
 		var newMesh;
 		newMesh = MeshInstance3D.new();
 		newMesh.mesh = ArrayMesh.new();
 		meshes.append(newMesh);
 		newMesh.material_override = material_override;
 		call_deferred("add_sibling", newMesh);
-	meshes[min(len(meshes) - 1, int(surfaceCount / 200))].mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a);
+	meshes[min(len(meshes) - 1, int(surfaceCount / surfacePerMesh))].mesh.call_deferred("add_surface_from_arrays", Mesh.PRIMITIVE_TRIANGLES, a, [], {}, 0);
 
 func _add_collider(verts, tris):
 	if !(colliderFacesDictionary.has((round(verts[len(verts) - 1] / Vector3(ChunkSize)) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2))):
@@ -291,9 +254,9 @@ func _physics_process(_delta):
 		for i in len(Threads):
 			if !Threads[i].is_started():
 				var surfaces = [];
-				for m in meshes:
-					surfaces.append_array(m.mesh._get_surfaces())
-				Threads[i].start(_remove_surface_thread.bind(surfaces.duplicate(false), builtChunks.duplicate(false), Threads[i]));
+				for m in len(meshes):
+					surfaces.append_array(meshes[m].mesh._get_surfaces());
+				Threads[i].start(_remove_surface_thread.bind(surfaces.duplicate(true), builtChunks.duplicate(false), Threads[i]));
 				break;
 	
 	if len(meshInfo):

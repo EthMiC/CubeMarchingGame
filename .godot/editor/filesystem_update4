@@ -1,5 +1,4 @@
 res://Scenes/main.tscn
 res://generateWorldTexture.gdshader
-res://Script/ProceduralMesh.gd
 res://Script/WorldTextureGenerator.gd
-res://new_image_texture.tres
+res://Script/ProceduralMesh.gd

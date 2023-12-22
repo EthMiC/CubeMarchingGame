@@ -1,10 +1,8 @@
 extends Node
 
 # Called when the node enters the scene tree for the first time.
-func _build(hill_Noise:Array[Image], hill_scale:float, clip_scale:float):
+func _build(hill_Noise:Image, mountain_Noise:Array[Image], clip_Noise:Image, hill_scale:float, clip_scale:float, hill_offset:float, clip_offset:float, total_y_Size:int):
 	var output_image_array:Array = [];
-	for i in len(hill_Noise):
-		output_image_array.append(Image.create(hill_Noise[0].get_width(), hill_Noise[0].get_height(), false, Image.FORMAT_RGBA8));
 	
 	var rd := RenderingServer.create_local_rendering_device();
 	
@@ -12,45 +10,44 @@ func _build(hill_Noise:Array[Image], hill_scale:float, clip_scale:float):
 	var shader_spirv: RDShaderSPIRV = shader_file.get_spirv();
 	var shader := rd.shader_create_from_spirv(shader_spirv);
 	
-	for i in len(hill_Noise) - 1:
-		var image0 = hill_Noise[i - 1] if i > 0 else Image.create(hill_Noise[0].get_width(), hill_Noise[0].get_height(), false, Image.FORMAT_RGBA8);
-		var image1 = hill_Noise[i];
-		var image2 = hill_Noise[i + 1];
-		
-		var output_image = output_image_array[i];
+	for l in 1:
+		hill_Noise.convert(Image.FORMAT_RGBA8);
+		clip_Noise.convert(Image.FORMAT_RGBA8);
 		
 		var fmt := RDTextureFormat.new();
-		fmt.width = image1.get_width();
-		fmt.height = image1.get_height();
+		fmt.width = hill_Noise.get_width();
+		fmt.height = hill_Noise.get_height();
 		fmt.format = RenderingDevice.DATA_FORMAT_A8B8G8R8_UNORM_PACK32;
 		fmt.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT;
 		
 		var view := RDTextureView.new();
-		image1.convert(Image.FORMAT_RGBA8);
-		image2.convert(Image.FORMAT_RGBA8);
-		var output_tex = rd.texture_create(fmt, view, [output_image.get_data()]);
-		var output_tex_uniform := RDUniform.new();
-		output_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
-		output_tex_uniform.binding = 0;
-		output_tex_uniform.add_id(output_tex);
-		var input_tex0 = rd.texture_create(fmt, view, [image0.get_data()]);
-		var input_tex_uniform0 := RDUniform.new();
-		input_tex_uniform0.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
-		input_tex_uniform0.binding = 1;
-		input_tex_uniform0.add_id(input_tex0);
-		var input_tex1 = rd.texture_create(fmt, view, [image1.get_data()]);
-		var input_tex_uniform1 := RDUniform.new();
-		input_tex_uniform1.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
-		input_tex_uniform1.binding = 2;
-		input_tex_uniform1.add_id(input_tex1);
-		var input_tex2 = rd.texture_create(fmt, view, [image2.get_data()]);
-		var input_tex_uniform2 := RDUniform.new();
-		input_tex_uniform2.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
-		input_tex_uniform2.binding = 3;
-		input_tex_uniform2.add_id(input_tex2);
-		var tex_uniform_set := rd.uniform_set_create([output_tex_uniform, input_tex_uniform0, input_tex_uniform1, input_tex_uniform2], shader, 0);
+		var output_data_array:Array = [];
+		var hill_input_tex = rd.texture_create(fmt, view, [hill_Noise.get_data()]);
+		var clip_input_tex = rd.texture_create(fmt, view, [clip_Noise.get_data()]);
+		var tex_uniform := RDUniform.new();
+		tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
+		tex_uniform.binding = 0;
+		for i in total_y_Size:
+			output_image_array.append(Image.create(hill_Noise.get_width(), hill_Noise.get_height(), false, Image.FORMAT_RGBA8));
+			output_data_array.append(rd.texture_create(fmt, view, [output_image_array[i].get_data()]));
+			tex_uniform.add_id(output_data_array[i]);
+		tex_uniform.add_id(hill_input_tex);
+		for i in total_y_Size + 2:
+			mountain_Noise[i].convert(Image.FORMAT_RGBA8);
+			tex_uniform.add_id(rd.texture_create(fmt, view, [mountain_Noise[i].get_data()]));
+		tex_uniform.add_id(clip_input_tex);
+		#var hill_input_tex_uniform := RDUniform.new();
+		#hill_input_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
+		#hill_input_tex_uniform.binding = 0;
+		#var mountain_input_tex_uniform := RDUniform.new();
+		#mountain_input_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
+		#mountain_input_tex_uniform.binding = 0;
+		var clip_input_tex_uniform := RDUniform.new();
+		clip_input_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE;
+		clip_input_tex_uniform.binding = 1;
+		var uniform_set := rd.uniform_set_create([tex_uniform], shader, 0);
 		
-		var information:PackedByteArray = PackedFloat32Array([i, hill_scale, clip_scale]).to_byte_array();
+		var information:PackedByteArray = PackedFloat32Array([total_y_Size, 0.25, hill_scale, clip_scale, hill_offset, clip_offset]).to_byte_array();
 		var buffer := rd.storage_buffer_create(information.size(), information);
 		var information_uniform := RDUniform.new();
 		information_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER;
@@ -61,16 +58,17 @@ func _build(hill_Noise:Array[Image], hill_scale:float, clip_scale:float):
 		var pipeline := rd.compute_pipeline_create(shader);
 		var compute_list := rd.compute_list_begin();
 		rd.compute_list_bind_compute_pipeline(compute_list, pipeline);
-		rd.compute_list_bind_uniform_set(compute_list, tex_uniform_set, 0);
+		rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0);
 		rd.compute_list_bind_uniform_set(compute_list, information_uniform_set, 1);
-		rd.compute_list_dispatch(compute_list, image1.get_width()/8, image1.get_height()/8, 1);
+		rd.compute_list_dispatch(compute_list, hill_Noise.get_width()/4, hill_Noise.get_height()/4, total_y_Size / 4);
 		rd.compute_list_end();
 		
 		rd.submit();
 		rd.sync();
-#
-		var byte_data1 : PackedByteArray = rd.texture_get_data(output_tex, 0);
-		var out_image := Image.create_from_data(image1.get_width(), image1.get_height(), false, Image.FORMAT_RGBA8, byte_data1);
-
-		output_image_array[i] = out_image;
+		
+		for i in total_y_Size:
+			var byte_data1 : PackedByteArray = rd.texture_get_data(output_data_array[i], 0);
+			var out_image := Image.create_from_data(hill_Noise.get_width(), hill_Noise.get_height(), false, Image.FORMAT_RGBA8, byte_data1);
+			output_image_array[i] = out_image;
+	
 	return output_image_array;
