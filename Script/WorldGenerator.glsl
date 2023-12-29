@@ -86,22 +86,22 @@ void main() {
     // val6 = mountainval6;
     // val7 = mountainval7;
 
-    // val1 = clamp((hillval1 + mountainval1) / 2, 0, 1);
-    // val2 = clamp((hillval2 + mountainval2) / 2, 0, 1);
-    // val3 = clamp((hillval3 + mountainval3) / 2, 0, 1);
-    // val4 = clamp((hillval4 + mountainval4) / 2, 0, 1);
-    // val5 = clamp((hillval5 + mountainval5) / 2, 0, 1);
-    // val6 = clamp((hillval6 + mountainval6) / 2, 0, 1);
-    // val7 = clamp((hillval7 + mountainval7) / 2, 0, 1);
+    val1 = clamp((hillval1 + mountainval1) / 2, 0, 1);
+    val2 = clamp((hillval2 + mountainval2) / 2, 0, 1);
+    val3 = clamp((hillval3 + mountainval3) / 2, 0, 1);
+    val4 = clamp((hillval4 + mountainval4) / 2, 0, 1);
+    val5 = clamp((hillval5 + mountainval5) / 2, 0, 1);
+    val6 = clamp((hillval6 + mountainval6) / 2, 0, 1);
+    val7 = clamp((hillval7 + mountainval7) / 2, 0, 1);
     
 
-    val1 = clamp((hillval1 - (1 - mountainval1) / 2), 0, 1);
-    val2 = clamp((hillval2 - (1 - mountainval2) / 2), 0, 1);
-    val3 = clamp((hillval3 - (1 - mountainval3) / 2), 0, 1);
-    val4 = clamp((hillval4 - (1 - mountainval4) / 2), 0, 1);
-    val5 = clamp((hillval5 - (1 - mountainval5) / 2), 0, 1);
-    val6 = clamp((hillval6 - (1 - mountainval6) / 2), 0, 1);
-    val7 = clamp((hillval7 - (1 - mountainval7) / 2), 0, 1);
+    // val1 = clamp((hillval1 - (1 - mountainval1) / 2), 0, 1);
+    // val2 = clamp((hillval2 - (1 - mountainval2) / 2), 0, 1);
+    // val3 = clamp((hillval3 - (1 - mountainval3) / 2), 0, 1);
+    // val4 = clamp((hillval4 - (1 - mountainval4) / 2), 0, 1);
+    // val5 = clamp((hillval5 - (1 - mountainval5) / 2), 0, 1);
+    // val6 = clamp((hillval6 - (1 - mountainval6) / 2), 0, 1);
+    // val7 = clamp((hillval7 - (1 - mountainval7) / 2), 0, 1);
 
     // val1 = clamp((mountainval1 - (1 - hillval1) / 2), 0, 1);
     // val2 = clamp((mountainval2 - (1 - hillval2) / 2), 0, 1);

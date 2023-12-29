@@ -5,6 +5,8 @@
 [ext_resource type="Script" path="res://Script/PlayerController.gd" id="3_wnpuk"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xnfs3"]
+sky_top_color = Color(0.23926, 0.746506, 0.886542, 1)
+sky_horizon_color = Color(0.662745, 0.658824, 0.611765, 1)
 
 [sub_resource type="Sky" id="Sky_0nvam"]
 sky_material = SubResource("ProceduralSkyMaterial_xnfs3")
@@ -57,6 +59,7 @@ environment = SubResource("Environment_x0kr0")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
 transform = Transform3D(-0.955937, 0.125827, -0.265241, -1.575e-08, 0.903492, 0.428604, 0.293573, 0.409718, -0.863681, 0, 0, 0)
+shadow_enabled = true
 
 [node name="PhysicalObjects" type="Node" parent="."]
 
@@ -66,7 +69,7 @@ transform = Transform3D(-0.955937, 0.125827, -0.265241, -1.575e-08, 0.903492, 0.
 material_override = SubResource("StandardMaterial3D_bljtc")
 mesh = SubResource("ArrayMesh_uwnis")
 script = ExtResource("1_8wbx3")
-TotalWorldSize = Vector3i(10, 1, 10)
+TotalWorldSize = Vector3i(25, 1, 25)
 WorldSize = Vector3i(10, 1, 10)
 ChunkSize = Vector3i(32, 100, 32)
 treshHold = 0.5
@@ -91,7 +94,7 @@ current = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 200, 0)
 script = ExtResource("3_wnpuk")
 SPEED = 5.612
-SPRINT_SPEED = 6.892
+SPRINT_SPEED = 20.676
 accel = 0.1
 deccel = 0.1
 sensitivity = 0.05

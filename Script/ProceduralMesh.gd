@@ -148,7 +148,7 @@ func _cube_marching_thread(_pos, _noisePos, i):
 						else:
 							var prevNormalValue = normals[verts.find(v)];
 							var vertPower = max(max(abs(prevNormalValue.x), abs(prevNormalValue.y)), abs(prevNormalValue.z));
-							var normalValue = (prevNormalValue / vertPower * (Vector3(1, 1, 1) - n) + n);
+							var normalValue = (prevNormalValue / vertPower * (Vector3(1, 1, 1) - n)) + n;
 							normals[verts.find(v)] = normalValue / normalValue.length();
 							localIndecies.append(verts.find(v));
 					
@@ -180,6 +180,8 @@ func _remove_surface_thread(surfaces, bufferList, i):
 		var _pos = (round(surfaces[s].aabb.position / Vector3(ChunkSize)) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2);
 		if _pos not in bufferList:
 			surfaces.remove_at(s);
+			surfaceCount -= 1;
+			 
 #			var initIndex = int(colliderFacesDictionary[(round(surfaces[s].aabb.position / ChunkSize) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2)][0]);
 #			var length = int(colliderFacesDictionary[(round(surfaces[s].aabb.position / ChunkSize) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2)][1]);
 			if colliderFacesDictionary.has(_pos):
@@ -192,8 +194,15 @@ func _remove_surface_thread(surfaces, bufferList, i):
 #					k[0] -= length;
 		else:
 			s += 1;
-	for m in len(meshes):
-		meshes[m].mesh._set_surfaces(surfaces.slice(m, surfacePerMesh * (m + 1)));
+	print(len(meshes))
+	var m = 0;
+	while m < len(meshes):
+		if surfacePerMesh * m <= len(surfaces):
+			meshes[m].mesh._set_surfaces(surfaces.slice(surfacePerMesh * m, surfacePerMesh * (m + 1)));
+			print(meshes[m].mesh.get_surface_count());
+			m += 1;
+		else:
+			meshes[m].mesh._set_surfaces([]);
 	call_deferred("_remove_thread", i);
 
 func _add_surface_from_arrays(a):
@@ -240,16 +249,10 @@ func _physics_process(_delta):
 					if checkPos.x >= 0 && checkPos.x < TotalWorldSize.x && checkPos.y >= 0 && checkPos.y < TotalWorldSize.y && checkPos.z >= 0 && checkPos.z < TotalWorldSize.z:
 						if chunkPos not in builtChunks:
 							chunkInfo.append([chunkPos, checkPos]);
-							builtChunks.append(chunkPos);
 						currChunks.append(chunkPos);
 		previousPlayerPos = currentPlayerPos;
 		
-		var c = 0
-		while c < len(builtChunks):
-			if builtChunks[c] not in currChunks:
-				builtChunks.remove_at(c);
-			else:
-				c += 1;
+		builtChunks = currChunks.duplicate(false);
 
 		for i in len(Threads):
 			if !Threads[i].is_started():
