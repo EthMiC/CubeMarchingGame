@@ -1,8 +1,9 @@
-[gd_scene load_steps=16 format=3 uid="uid://c3un6mwkugkjc"]
+[gd_scene load_steps=19 format=3 uid="uid://c3un6mwkugkjc"]
 
 [ext_resource type="Script" path="res://Script/ProceduralMesh.gd" id="1_8wbx3"]
 [ext_resource type="Script" path="res://Script/CameraOrbit.gd" id="3_g1c82"]
 [ext_resource type="Script" path="res://Script/PlayerController.gd" id="3_wnpuk"]
+[ext_resource type="Shader" path="res://outline.gdshader" id="4_rlbs4"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xnfs3"]
 sky_top_color = Color(0.23926, 0.746506, 0.886542, 1)
@@ -46,10 +47,22 @@ offset = Vector3(0, 0, 1037)
 fractal_octaves = 3
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_h60eu"]
+radius = 0.25
 height = 1.875
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_wd1tb"]
-radius = 0.45
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7k13g"]
+render_priority = 0
+shader = ExtResource("4_rlbs4")
+shader_parameter/scale = Vector3(2, 2, 2)
+shader_parameter/width = 0.72
+shader_parameter/sharpness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_npiwh"]
+material = SubResource("ShaderMaterial_7k13g")
+size = Vector3(1.001, 1.001, 1.001)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_s70fs"]
+radius = 0.25
 height = 1.875
 
 [node name="Main" type="Node3D"]
@@ -70,7 +83,7 @@ material_override = SubResource("StandardMaterial3D_bljtc")
 mesh = SubResource("ArrayMesh_uwnis")
 script = ExtResource("1_8wbx3")
 TotalWorldSize = Vector3i(25, 1, 25)
-WorldSize = Vector3i(10, 1, 10)
+WorldSize = Vector3i(23, 1, 23)
 ChunkSize = Vector3i(32, 100, 32)
 treshHold = 0.5
 mountainNoise = SubResource("FastNoiseLite_njr2d")
@@ -94,7 +107,8 @@ current = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 200, 0)
 script = ExtResource("3_wnpuk")
 SPEED = 5.612
-SPRINT_SPEED = 20.676
+SPRINT_SPEED = 6.892
+JUMP_VELOCITY = 8.0
 accel = 0.1
 deccel = 0.1
 sensitivity = 0.05
@@ -102,9 +116,29 @@ sensitivity = 0.05
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Entities/CharacterBody3D"]
 shape = SubResource("CapsuleShape3D_h60eu")
 
+[node name="RayCast3D" type="RayCast3D" parent="Entities/CharacterBody3D/CollisionShape3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.563, 0)
+
 [node name="Camera3D" type="Camera3D" parent="Entities/CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.563, 0)
 
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Entities/CharacterBody3D/Camera3D"]
+mesh = SubResource("BoxMesh_npiwh")
+skeleton = NodePath("../../../..")
+
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Entities/CharacterBody3D"]
-mesh = SubResource("CapsuleMesh_wd1tb")
+mesh = SubResource("CapsuleMesh_s70fs")
 skeleton = NodePath("../../..")
+
+[node name="GUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+
+[node name="ColorRect" type="ColorRect" parent="GUI"]
+layout_mode = 0
+offset_left = 573.0
+offset_top = 321.0
+offset_right = 579.0
+offset_bottom = 327.0

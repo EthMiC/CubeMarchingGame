@@ -195,12 +195,10 @@ func _remove_surface_thread(surfaces, bufferList, i):
 		else:
 			s += 1;
 	print(len(meshes))
-	var m = 0;
-	while m < len(meshes):
+	for m in len(meshes):
 		if surfacePerMesh * m <= len(surfaces):
 			meshes[m].mesh._set_surfaces(surfaces.slice(surfacePerMesh * m, surfacePerMesh * (m + 1)));
 			print(meshes[m].mesh.get_surface_count());
-			m += 1;
 		else:
 			meshes[m].mesh._set_surfaces([]);
 	call_deferred("_remove_thread", i);
