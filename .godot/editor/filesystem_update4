@@ -1,5 +1,4 @@
 res://Scenes/main.tscn
-res://generateWorldTexture.gdshader
-res://Script/PlayerController.gd
-res://Script/ProceduralMesh.gd
 res://outline.gdshader
+res://generateWorldTexture.gdshader
+res://Script/ProceduralMesh.gd

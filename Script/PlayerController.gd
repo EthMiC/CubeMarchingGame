@@ -10,6 +10,7 @@ extends CharacterBody3D
 
 var rayCast:RayCast3D;
 var cam:Camera3D;
+var world:MeshInstance3D;
 
 var started = false;
 var front:float;
@@ -21,6 +22,7 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 func _ready():
 	rayCast = get_child(0).get_child(0);
 	cam = get_child(1);
+	world = get_node("/root/Main/PhysicalObjects/ProceduralMesh/Ground")
 
 func _physics_process(delta):
 	if Input.is_action_just_pressed("ui_text_completion_accept"):
@@ -30,7 +32,7 @@ func _physics_process(delta):
 	if !started:
 		return;      
 	
-	var dir = transform.basis.z;3
+	var dir = transform.basis.z;
 	
 	var frontInput = float(Input.is_key_pressed(KEY_W)) - float(Input.is_key_pressed(KEY_S));
 	var rightInput = float(Input.is_key_pressed(KEY_D)) - float(Input.is_key_pressed(KEY_A));
@@ -75,7 +77,11 @@ func _physics_process(delta):
 		cam.get_child(0).position = Vector3.ZERO;
 
 func _input(event):
-	if event is InputEventMouseMotion && started:
-		rotate_y(deg_to_rad(-event.relative.x * sensitivity));
-		cam.rotate_x(deg_to_rad(-event.relative.y * sensitivity));
-		#cam.rotation.x = clamp(rotation.x, deg_to_rad(0), deg_to_rad(180));
+	if started:
+		if event is InputEventMouseMotion:
+			rotate_y(deg_to_rad(-event.relative.x * sensitivity));
+			cam.rotate_x(deg_to_rad(-event.relative.y * sensitivity));
+			#cam.rotation.x = clamp(rotation.x, deg_to_rad(0), deg_to_rad(180));
+		if event.is_pressed() && event is InputEventMouseButton && rayCast.is_colliding():
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				world.updateChunk(round(rayCast.get_collision_point() - rayCast.get_collision_normal() / 2), false);
