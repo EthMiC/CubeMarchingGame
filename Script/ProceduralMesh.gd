@@ -140,16 +140,10 @@ func _cube_marching_thread(_pos, _noisePos, i, update:bool = false):
 					
 					for lv in len(localVertecies):
 						var v = currCoords + localVertecies[lv];
-						var n = localNormals[lv];
 						if v not in verts:
 							verts.append(v);
-							normals.append(n)
 							localIndecies.append(len(verts) - 1);
 						else:
-							var prevNormalValue = normals[verts.find(v)];
-							var vertPower = max(max(abs(prevNormalValue.x), abs(prevNormalValue.y)), abs(prevNormalValue.z));
-							var normalValue = (prevNormalValue / vertPower * (Vector3(1, 1, 1) - n)) + n;
-							normals[verts.find(v)] = normalValue / normalValue.length();
 							localIndecies.append(verts.find(v));
 					
 					for l in len(localIndecies)/4:
@@ -158,10 +152,9 @@ func _cube_marching_thread(_pos, _noisePos, i, update:bool = false):
 		verts.append((_pos - Vector3(TotalWorldSize.x - 1, 0, TotalWorldSize.z - 1) / 2) * Vector3(ChunkSize));
 		normals.append(Vector3.UP);
 	
-	meshInfo.append({"verts": verts, "tris": tris, "normals": normals});
+	meshInfo.append({"verts": verts, "tris": tris});
 	
 	if update:
-		print(round(verts[len(verts) - 1] / Vector3(ChunkSize)) + Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2)
 		var surfaces = []
 		for m in meshes:
 			surfaces.append_array(m.mesh._get_surfaces());
@@ -172,14 +165,14 @@ func _cube_marching_thread(_pos, _noisePos, i, update:bool = false):
 	
 	call_deferred("_remove_thread", i);
 
-func _build_mesh_thread(verts, tris, normals, i):
+func _build_mesh_thread(verts, tris, i):
 	var surface_array = [];
 	if len(verts):
 		surface_array.resize(Mesh.ARRAY_MAX);
 #
 		surface_array[Mesh.ARRAY_VERTEX] = verts;
 #		surface_array[Mesh.ARRAY_TEX_UV] = uvs;
-		surface_array[Mesh.ARRAY_NORMAL] = normals;
+		#surface_array[Mesh.ARRAY_NORMAL] = normals;
 		surface_array[Mesh.ARRAY_INDEX] = tris;
 		call("_add_surface_from_arrays", surface_array);
 		call("_add_collider", verts, tris);
@@ -201,7 +194,6 @@ func _remove_surface_thread(surfaces, bufferList, i, specific):
 				s += 1;
 		else:
 			if _pos in bufferList:
-				print("op")
 				bufferList.erase(_pos);
 				surfaces.remove_at(s);
 				surfaceCount -= 1;
@@ -282,7 +274,7 @@ func _physics_process(_delta):
 			if !len(meshInfo):
 				break;
 			if !Threads[i].is_started():
-				Threads[i].start(_build_mesh_thread.bind(meshInfo[0].verts, meshInfo[0].tris, meshInfo[0].normals, Threads[i]));
+				Threads[i].start(_build_mesh_thread.bind(meshInfo[0].verts, meshInfo[0].tris, Threads[i]));
 #				_build_mesh_thread(meshInfo[0].verts, meshInfo[0].tris, meshInfo[0].normals, Threads[i])
 				meshInfo.remove_at(0);
 #	if collider.get_faces() != colliderFaces:
@@ -300,12 +292,38 @@ func _physics_process(_delta):
 				chunkInfo.remove_at(0);
 
 func updateChunk(blockPos:Vector3, add:bool):
-	var pixelPos = blockPos + (t - 2 * floor((t - w) / 2)) * Vector3(ChunkSize.x, 1, ChunkSize.z) / 2;
+	var pixelPos = blockPos + (t) * Vector3(ChunkSize.x, 1, ChunkSize.z) / 2;
+	if pixelPos.x < 0 || pixelPos.x >= (TotalWorldSize.x * ChunkSize.x) - 1 || pixelPos.y < 0 || pixelPos.y >= (TotalWorldSize.y * ChunkSize.y) - 1 || pixelPos.z < 0 || pixelPos.z >= (TotalWorldSize.z * ChunkSize.z) - 1:
+		return;
 	if add:
-		finalNoiseTexture[pixelPos.y].set_pixel(pixelPos.x, pixelPos.z, Color8(0, 0, 0));
+		var val = 0;
+		if finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x, pixelPos.z - 1).r * ((2 ** 8) - 1) >= 32:
+			finalNoiseTexture[pixelPos.y].set_pixel(pixelPos.x, pixelPos.z - 1, Color8(int(finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x, pixelPos.z - 1).r * ((2 ** 8) - 1)) - 32, 0, 0, 0));
+		else:
+			val += 4;
+		if finalNoiseTexture[pixelPos.y + 1].get_pixel(pixelPos.x, pixelPos.z).r * ((2 ** 8) - 1) >= 16:
+			finalNoiseTexture[pixelPos.y + 1].set_pixel(pixelPos.x, pixelPos.z, Color8(int(finalNoiseTexture[pixelPos.y + 1].get_pixel(pixelPos.x, pixelPos.z).r * ((2 ** 8) - 1)) - 16, 0, 0, 0));
+		else:
+			val += 2;
+		if finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x - 1, pixelPos.z).r * ((2 ** 8) - 1) >= 8:
+			finalNoiseTexture[pixelPos.y].set_pixel(pixelPos.x - 1, pixelPos.z, Color8(int(finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x - 1, pixelPos.z).r * ((2 ** 8) - 1)) - 8, 0, 0, 0));
+		else:
+			val += 1;
+		if finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x, pixelPos.z + 1).r * ((2 ** 8) - 1) >= 4:
+			finalNoiseTexture[pixelPos.y].set_pixel(pixelPos.x, pixelPos.z + 1, Color8(int(finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x, pixelPos.z + 1).r * ((2 ** 8) - 1)) - 4, 0, 0, 0));
+		else:
+			val += 32;
+		if finalNoiseTexture[pixelPos.y + 1].get_pixel(pixelPos.x, pixelPos.z).r * ((2 ** 8) - 1) >= 2:
+			finalNoiseTexture[pixelPos.y + 1].set_pixel(pixelPos.x, pixelPos.z, Color8(int(finalNoiseTexture[pixelPos.y + 1].get_pixel(pixelPos.x, pixelPos.z).r * ((2 ** 8) - 1)) - 2, 0, 0, 0));
+		else:
+			val += 16;
+		if finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x + 1, pixelPos.z).r * ((2 ** 8) - 1) >= 1:
+			finalNoiseTexture[pixelPos.y].set_pixel(pixelPos.x + 1, pixelPos.z, Color8(int(finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x + 1, pixelPos.z).r * ((2 ** 8) - 1)) - 1, 0, 0, 0));
+		else:
+			val += 8;
+		finalNoiseTexture[pixelPos.y].set_pixel(pixelPos.x, pixelPos.z, finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x, pixelPos.z) + Color8(val, 0, 0, 0));
 	else:
 		var surface = finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x, pixelPos.z).r * 2 ** 8;
-		print(surface)
 		if surface >= 32:
 			surface -= 32;
 		else:
@@ -331,7 +349,7 @@ func updateChunk(blockPos:Vector3, add:bool):
 		else:
 			finalNoiseTexture[pixelPos.y].set_pixel(pixelPos.x - 1, pixelPos.z, finalNoiseTexture[pixelPos.y].get_pixel(pixelPos.x - 1, pixelPos.z) + Color8(8, 0, 0, 0));
 		finalNoiseTexture[pixelPos.y].set_pixel(pixelPos.x, pixelPos.z, Color8(0, 0, 0));
-	chunkInfo.append([floor(blockPos / Vector3(ChunkSize)) * Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2, floor(pixelPos / Vector3(ChunkSize)) * Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2, true]);
+	chunkInfo.append([floor((blockPos / Vector3(ChunkSize)) - ((Vector3(1, 0, 1) * t - (2 * floor(t/2))) / 2)) + ((Vector3(1, 0, 1) * t - (2 * floor(t/2))) / 2), floor(pixelPos / Vector3(ChunkSize)), true]);
 	#var possibleBorders = [Vector3(1, 0, 0), Vector3(0, 0, 1), Vector3(-1, 0, 0), Vector3(0, 0, -1)];
 	#for p in possibleBorders:
 		#if floor(blockPos / Vector3(ChunkSize)) * Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2 != floor((blockPos + p) / Vector3(ChunkSize)) * Vector3(TotalWorldSize.x, 0, TotalWorldSize.z) / 2:

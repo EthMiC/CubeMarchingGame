@@ -85,3 +85,5 @@ func _input(event):
 		if event.is_pressed() && event is InputEventMouseButton && rayCast.is_colliding():
 			if event.button_index == MOUSE_BUTTON_LEFT:
 				world.updateChunk(round(rayCast.get_collision_point() - rayCast.get_collision_normal() / 2), false);
+			if event.button_index == MOUSE_BUTTON_RIGHT:
+				world.updateChunk(round(rayCast.get_collision_point() + rayCast.get_collision_normal() / 2), true);
